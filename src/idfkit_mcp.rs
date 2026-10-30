@@ -1,7 +1,7 @@
 use zed_extension_api as zed;
 
 use serde::Deserialize;
-use zed_extension_api::{ContextServerConfiguration, ContextServerId, Project};
+use zed_extension_api::{ContextServerConfiguration, ContextServerId, Os, Project, current_platform};
 
 /// User-configurable settings for the idfkit MCP context server.
 ///
@@ -63,6 +63,11 @@ impl IdfkitMcpExtension {
     /// it takes priority over every other fallback without giving up the
     /// launcher's other guarantees.
     ///
+    /// On **Windows**, the POSIX launcher is not available (`/bin/sh`
+    /// does not exist): `uvx` is called directly instead — with the
+    /// `uvx_path` override if set, otherwise the bare name resolved by
+    /// the host's `PATH`.
+    ///
     /// We also pass `UV_NO_PROGRESS=1` at the process level: `uv` writes
     /// its download progress bar to stderr, which can interfere with the
     /// MCP handshake on the first (cache-cold) run. This is redundant
@@ -81,6 +86,23 @@ impl IdfkitMcpExtension {
         // empty string is treated as "not set" and dropped entirely.
         if let Some(uvx_path) = settings.uvx_path.as_deref().filter(|p| !p.is_empty()) {
             env.push(("IDFKIT_UVX_PATH".to_string(), uvx_path.to_string()));
+        }
+
+        // Windows: the POSIX launcher (`/bin/sh -c`) is not available.
+        // Call `uvx` directly — Zed's host process resolves it through the
+        // system PATH there, and uv ships a native `uvx.exe`. On macOS and
+        // Linux, keep the universal launcher (PATH-independent uvx
+        // resolution, CWD neutralization, progress-bar pinning).
+        if matches!(current_platform().0, Os::Windows) {
+            let command = settings
+                .uvx_path
+                .filter(|p| !p.trim().is_empty())
+                .unwrap_or_else(|| "uvx".to_string());
+            return Ok(zed::Command {
+                command,
+                args: vec!["idfkit-mcp".to_string()],
+                env,
+            });
         }
 
         Ok(zed::Command {
