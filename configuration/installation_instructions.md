@@ -22,27 +22,14 @@ automatically — there is nothing to install manually.
 
 ## Usage
 
-Once Zed has `uv` on its `PATH`, the extension starts the server with
-`uvx idfkit-mcp` the first time you use it from the Agent Panel. You can
-point the extension at a custom `uvx` binary with the `uvx_path` setting.
+No configuration is required: the extension starts the server the first
+time you use it from the Agent Panel, through a built-in launcher that
+resolves `uvx` independently of Zed's `PATH`.
 
-## Troubleshooting
+## Advanced override (optional)
 
-If the server stays on **"Connecting…"** in the Agent Panel (the MCP
-initialize handshake times out after 60 s), Zed most likely spawned
-`uvx` with a GUI-minimal `PATH` (`/usr/bin:/bin:/usr/sbin:/sbin`) that
-does not contain it — context servers are not launched through a login
-shell (see [zed-industries/zed #60800](https://github.com/zed-industries/zed/issues/60800)).
-
-Fix: give the extension the **absolute path** of the binary (or of a
-wrapper script):
-
-```sh
-# in a terminal, find the absolute path:
-which uvx        # e.g. /opt/homebrew/bin/uvx
-```
-
-then in Zed settings:
+In the rare case where `uvx` lives in a non-standard location, you can
+point the extension at it explicitly with the `uvx_path` setting:
 
 ```jsonc
 {
@@ -55,8 +42,3 @@ then in Zed settings:
   }
 }
 ```
-
-Alternatively, point `uvx_path` at a small `sh` wrapper that sets up
-`PATH` itself and then `exec`s `uvx "$@"`. The extension also sets
-`UV_NO_PROGRESS=1` so uv's first-download progress bar does not
-interfere with the MCP handshake.

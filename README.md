@@ -35,8 +35,15 @@ cloned directory.
 
 ## Configuration
 
-The only setting is `uvx_path`, the path to the `uvx` binary (defaults
-to `"uvx"`, resolved against your `PATH`):
+None required — the extension is fully self-contained: it ships a
+built-in launcher that resolves `uvx` independently of Zed's `PATH`,
+so the server starts as soon as [uv](https://docs.astral.sh/uv/) is
+installed.
+
+## Advanced override (optional)
+
+In the rare case where `uvx` lives in a non-standard location, set
+`uvx_path`:
 
 ```jsonc
 {
@@ -53,13 +60,10 @@ to `"uvx"`, resolved against your `PATH`):
 ## Troubleshooting
 
 If the server stays on "Connecting…" (MCP initialize times out after
-60 s): Zed spawns context servers with a GUI-minimal `PATH`
-(`/usr/bin:/bin:...`), no login shell — see
-[zed-industries/zed #60800](https://github.com/zed-industries/zed/issues/60800).
-Fix: run `which uvx` in a terminal and set `uvx_path` to the absolute
-path (e.g. `/opt/homebrew/bin/uvx`) or to a `sh` wrapper that sets up
-`PATH` itself. The extension sets `UV_NO_PROGRESS=1` so uv's
-first-download progress bar doesn't interfere with the handshake.
+60 s), make sure [uv](https://docs.astral.sh/uv/) is installed and on
+your `PATH` (`which uvx`). The extension sets `UV_NO_PROGRESS=1` so
+uv's first-download progress bar doesn't interfere with the MCP
+handshake.
 
 ## Resources
 
