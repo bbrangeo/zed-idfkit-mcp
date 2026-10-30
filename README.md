@@ -50,6 +50,17 @@ to `"uvx"`, resolved against your `PATH`):
 }
 ```
 
+## Troubleshooting
+
+If the server stays on "Connecting…" (MCP initialize times out after
+60 s): Zed spawns context servers with a GUI-minimal `PATH`
+(`/usr/bin:/bin:...`), no login shell — see
+[zed-industries/zed #60800](https://github.com/zed-industries/zed/issues/60800).
+Fix: run `which uvx` in a terminal and set `uvx_path` to the absolute
+path (e.g. `/opt/homebrew/bin/uvx`) or to a `sh` wrapper that sets up
+`PATH` itself. The extension sets `UV_NO_PROGRESS=1` so uv's
+first-download progress bar doesn't interfere with the handshake.
+
 ## Resources
 
 - idfkit-mcp repository: <https://github.com/idfkit/idfkit-mcp>

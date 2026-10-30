@@ -9,8 +9,15 @@ use zed_extension_api::{ContextServerConfiguration, ContextServerId, Project};
 /// hands it back to us through `ContextServerSettings::for_project`.
 #[derive(Deserialize, Default, schemars::JsonSchema)]
 struct IdfkitMcpExtensionSettings {
-    /// Custom path to the `uvx` binary. Defaults to `"uvx"` (resolved
-    /// against the user's `PATH` by the Zed host process).
+    /// Custom path to the `uvx` binary. Defaults to `"uvx"`.
+    ///
+    /// A bare name relies on the `PATH` Zed gives to spawned context
+    /// servers, which is a GUI-minimal `PATH` (`/usr/bin:/bin:...`) —
+    /// see zed-industries/zed #60800. If `uvx` is not on that `PATH`
+    /// (e.g. Homebrew installs), the process dies at spawn and the
+    /// server never connects (initialize times out after 60 s). Prefer
+    /// an absolute path such as `/opt/homebrew/bin/uvx`, or a wrapper
+    /// script that sets up the environment itself.
     uvx_path: Option<String>,
 }
 
@@ -28,9 +35,18 @@ impl IdfkitMcpExtension {
     /// The server is a PyPI package (`idfkit-mcp`) executed through
     /// `uvx`, which downloads/updates it automatically. We return the
     /// bare binary name (or the user's `uvx_path` override): Zed's host
-    /// process spawns context-server commands with the user's shell
-    /// environment, so `PATH` resolution happens there. No `std::fs`
-    /// access is needed (and none is possible from the WASM sandbox).
+    /// process spawns context-server commands with `Shell::System` +
+    /// `non_interactive()`, i.e. a GUI-minimal `PATH` (`/usr/bin:/bin:...`)
+    /// and no login shell — see zed-industries/zed #60800. If `uvx` is
+    /// not on that `PATH`, the process dies at spawn (broken pipe →
+    /// initialize timeout after 60 s); users should set `uvx_path` to an
+    /// absolute path (e.g. `/opt/homebrew/bin/uvx`) or a wrapper script.
+    /// No `std::fs` access is needed (and none is possible from the WASM
+    /// sandbox), so we cannot resolve the path ourselves.
+    ///
+    /// We also pass `UV_NO_PROGRESS=1`: `uv` writes its download progress
+    /// bar to stderr, which can interfere with the MCP handshake on the
+    /// first (cache-cold) run.
     fn resolve_command(&self, project: &Project) -> zed::Result<zed::Command> {
         let settings =
             zed::settings::ContextServerSettings::for_project(CONTEXT_SERVER_ID, project)?;
@@ -44,7 +60,7 @@ impl IdfkitMcpExtension {
         Ok(zed::Command {
             command,
             args: vec!["idfkit-mcp".to_string()],
-            env: vec![],
+            env: vec![("UV_NO_PROGRESS".to_string(), "1".to_string())],
         })
     }
 }

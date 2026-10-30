@@ -1,4 +1,8 @@
-// Optional: custom path to the uvx binary (defaults to "uvx" on PATH)
+// Optional: custom path to the uvx binary. Defaults to "uvx", but Zed
+// spawns context servers with a GUI-minimal PATH (zed-industries/zed
+// #60800), so a bare name fails if uvx lives outside /usr/bin:/bin.
+// Prefer an absolute path, e.g. "/opt/homebrew/bin/uvx". UV_NO_PROGRESS=1
+// is set automatically by the extension.
 {
   "uvx_path": "uvx"
 }

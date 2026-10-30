@@ -1,7 +1,7 @@
 id = "idfkit-mcp"
 name = "idfkit MCP Server"
 description = "EnergyPlus building energy simulation MCP server via idfkit"
-version = "0.1.0"
+version = "0.1.1"
 schema_version = 1
 authors = ["Boris <boris@tipee.fr>"]
 repository = "https://github.com/bbrangeo/zed-idfkit-mcp"
