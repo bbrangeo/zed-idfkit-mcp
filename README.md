@@ -101,6 +101,17 @@ MCP handshake.
 `energyplus` on your `PATH` or point the agent to it via
 `ENERGYPLUS_DIR`.
 
+## Platform support
+
+- **macOS / Linux** — the extension runs a built-in universal launcher
+  through `/bin/sh -c`: it resolves `uvx` independently of Zed's limited
+  GUI `PATH` (fallback chain: `IDFKIT_UVX_PATH` override → `PATH` →
+  Homebrew / `~/.local/bin`), neutralizes the working directory, and pins
+  `UV_NO_PROGRESS=1`.
+- **Windows** (v0.2.1) — the POSIX launcher is not available, so the
+  extension calls `uvx` directly instead (honoring the `uvx_path`
+  override if set, otherwise the bare name resolved by the host `PATH`).
+
 ## Resources
 
 - idfkit-mcp repository: <https://github.com/idfkit/idfkit-mcp>
