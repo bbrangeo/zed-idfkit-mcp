@@ -1,0 +1,4 @@
+// Optional: custom path to the uvx binary (defaults to "uvx" on PATH)
+{
+  "uvx_path": "uvx"
+}
