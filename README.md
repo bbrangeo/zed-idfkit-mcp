@@ -30,7 +30,9 @@ Once connected, the Zed agent can:
 
 ### 1. Install the extension
 
-Once published, install from the Zed extension marketplace
+The extension is under review in
+[zed-industries/extensions#8190](https://github.com/zed-industries/extensions/pull/8190)
+(CI green). Once it merges, install from the Zed extension marketplace
 (Extensions → search "idfkit"). Until then, install it as a dev
 extension:
 
